@@ -14,6 +14,7 @@
 
 // Modally presents the UserVoice view and provides a way to exit the feedback
 // flow and return to the app.
+
 + (void)presentUserVoiceModalViewControllerForParent:(UIViewController *)viewController 
 											 andSite:(NSString *)site
 											  andKey:(NSString *)key
@@ -34,5 +35,24 @@
 											 andGUID:(NSString *)guid;
 
 + (void)showUserVoice:(UIViewController *)rootViewController forController:(UIViewController *)viewController;
+
+
+// Returns the appropriate UserVoice view for displaying non-modally
+
++ (UIViewController*)userVoiceViewControllerForSite:(NSString *)site
+                                             andKey:(NSString *)key
+                                          andSecret:(NSString *)secret;
+
++ (UIViewController*)userVoiceViewControllerForSite:(NSString *)site
+                                             andKey:(NSString *)key
+                                          andSecret:(NSString *)secret
+                                        andSsoToken:(NSString *)token;
+
++ (UIViewController*)userVoiceViewControllerForSite:(NSString *)site
+                                             andKey:(NSString *)key
+                                          andSecret:(NSString *)secret
+                                           andEmail:(NSString *)email
+                                     andDisplayName:(NSString *)displayName
+                                            andGUID:(NSString *)guid;
 
 @end

@@ -15,10 +15,12 @@
 
 @implementation UserVoice
 
-+ (void)presentUserVoiceModalViewControllerForParent:(UIViewController *)viewController 
-											 andSite:(NSString *)site
-											  andKey:(NSString *)key
-										   andSecret:(NSString *)secret {
+#pragma mark non-modal presentation
+
++ (UIViewController*)userVoiceViewControllerForSite:(NSString *)site
+                                             andKey:(NSString *)key
+                                          andSecret:(NSString *)secret {
+    
 	[UVSession currentSession].config = [[UVConfig alloc] initWithSite:site andKey:key andSecret:secret];
  	
 	UIViewController *rootViewController;
@@ -30,14 +32,14 @@
 	{
 		rootViewController = [[[UVRootViewController alloc] init] autorelease];
 	}
-	[self showUserVoice:rootViewController forController:viewController];
+    return rootViewController;
 }
 
-+ (void)presentUserVoiceModalViewControllerForParent:(UIViewController *)viewController 
-											 andSite:(NSString *)site
-											  andKey:(NSString *)key
-										   andSecret:(NSString *)secret
-										 andSsoToken:(NSString *)token {
++ (UIViewController*)userVoiceViewControllerForSite:(NSString *)site
+                                             andKey:(NSString *)key
+                                          andSecret:(NSString *)secret
+                                        andSsoToken:(NSString *)token {
+    
 	[UVSession currentSession].config = [[UVConfig alloc] initWithSite:site andKey:key andSecret:secret];
 	
 	// exchange the sso token for an access token, store it then load up the root view	
@@ -50,16 +52,16 @@
 	{
 		rootViewController = [[[UVRootViewController alloc] initWithSsoToken:token] autorelease];
 	}
-	[self showUserVoice:rootViewController forController:viewController];
+    return rootViewController;
 }
 
-+ (void)presentUserVoiceModalViewControllerForParent:(UIViewController *)viewController 
-											 andSite:(NSString *)site
-											  andKey:(NSString *)key
-										   andSecret:(NSString *)secret
-											andEmail:(NSString *)email
-									  andDisplayName:(NSString *)displayName
-											 andGUID:(NSString *)guid {
++ (UIViewController*)userVoiceViewControllerForSite:(NSString *)site
+                                             andKey:(NSString *)key
+                                          andSecret:(NSString *)secret
+                                           andEmail:(NSString *)email
+                                     andDisplayName:(NSString *)displayName
+                                            andGUID:(NSString *)guid {
+    
 	[UVSession currentSession].config = [[UVConfig alloc] initWithSite:site andKey:key andSecret:secret];
 	
 	UIViewController *rootViewController;
@@ -73,6 +75,49 @@
 																  andGUID:guid 
 																  andName:displayName] autorelease];
 	}
+    return rootViewController;
+}
+
+#pragma mark modal presentation
+
++ (void)presentUserVoiceModalViewControllerForParent:(UIViewController *)viewController 
+											 andSite:(NSString *)site
+											  andKey:(NSString *)key
+										   andSecret:(NSString *)secret {
+    
+	UIViewController* rootViewController = [UserVoice userVoiceViewControllerForSite:site
+                                                                              andKey:key
+                                                                           andSecret:secret];
+	[self showUserVoice:rootViewController forController:viewController];
+}
+
++ (void)presentUserVoiceModalViewControllerForParent:(UIViewController *)viewController 
+											 andSite:(NSString *)site
+											  andKey:(NSString *)key
+										   andSecret:(NSString *)secret
+										 andSsoToken:(NSString *)token {
+
+	UIViewController* rootViewController = [UserVoice userVoiceViewControllerForSite:site
+                                                                              andKey:key
+                                                                           andSecret:secret
+                                                                         andSsoToken:token];
+	[self showUserVoice:rootViewController forController:viewController];
+}
+
++ (void)presentUserVoiceModalViewControllerForParent:(UIViewController *)viewController 
+											 andSite:(NSString *)site
+											  andKey:(NSString *)key
+										   andSecret:(NSString *)secret
+											andEmail:(NSString *)email
+									  andDisplayName:(NSString *)displayName
+											 andGUID:(NSString *)guid {
+
+	UIViewController* rootViewController = [UserVoice userVoiceViewControllerForSite:site
+                                                                              andKey:key
+                                                                           andSecret:secret
+                                                                            andEmail:email
+                                                                      andDisplayName:displayName
+                                                                             andGUID:guid];
 	[self showUserVoice:rootViewController forController:viewController];
 	
 }
