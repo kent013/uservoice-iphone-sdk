@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		644E0BA51460A5C7005EFF18 /* UserVoice.h in Headers */ = {isa = PBXBuildFile; fileRef = 644E0BA61460A5C7005EFF18 /* UserVoice.h */; };
 		80B5291E13A16A2F008709D2 /* UVCustomField.h in Headers */ = {isa = PBXBuildFile; fileRef = 80B5291C13A16A2F008709D2 /* UVCustomField.h */; };
 		80B5291F13A16A2F008709D2 /* UVCustomField.m in Sources */ = {isa = PBXBuildFile; fileRef = 80B5291D13A16A2F008709D2 /* UVCustomField.m */; };
 		9FB0D9A31189EA2D001B2362 /* UVTopic.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F22C9C61189132A0091745E /* UVTopic.m */; };
@@ -123,7 +124,6 @@
 		D24BE52411DC11A600B26012 /* UVTaskBar.m in Sources */ = {isa = PBXBuildFile; fileRef = D24BE52211DC11A600B26012 /* UVTaskBar.m */; };
 		D25C899511B1CE98000C0B43 /* UVStatus.h in Headers */ = {isa = PBXBuildFile; fileRef = D25C899311B1CE98000C0B43 /* UVStatus.h */; };
 		D25C899611B1CE98000C0B43 /* UVStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = D25C899411B1CE98000C0B43 /* UVStatus.m */; };
-		D2605CB214465F2C0029F16B /* UserVoice.h in Headers */ = {isa = PBXBuildFile; fileRef = D2605CB414465F2C0029F16B /* UserVoice.h */; };
 		D261E056121456430024F2EA /* UVStreamPoller.h in Headers */ = {isa = PBXBuildFile; fileRef = D261E054121456430024F2EA /* UVStreamPoller.h */; };
 		D261E057121456430024F2EA /* UVStreamPoller.m in Sources */ = {isa = PBXBuildFile; fileRef = D261E055121456430024F2EA /* UVStreamPoller.m */; };
 		D2620D2E11B589FE0053EA4C /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2620D2D11B589FE0053EA4C /* SystemConfiguration.framework */; };
@@ -190,6 +190,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		644E0BA61460A5C7005EFF18 /* UserVoice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UserVoice.h; path = Include/UserVoice.h; sourceTree = SOURCE_ROOT; };
 		80B5291C13A16A2F008709D2 /* UVCustomField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UVCustomField.h; sourceTree = "<group>"; };
 		80B5291D13A16A2F008709D2 /* UVCustomField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UVCustomField.m; sourceTree = "<group>"; };
 		9F22C9C51189132A0091745E /* UVTopic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UVTopic.h; sourceTree = "<group>"; };
@@ -315,7 +316,6 @@
 		D24BEBC911DD6C1100B26012 /* dropshadow_top_30.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dropshadow_top_30.png; sourceTree = "<group>"; };
 		D25C899311B1CE98000C0B43 /* UVStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UVStatus.h; sourceTree = "<group>"; };
 		D25C899411B1CE98000C0B43 /* UVStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UVStatus.m; sourceTree = "<group>"; };
-		D2605CB314465F2C0029F16B /* en */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = en; path = en.lproj/UserVoice.h; sourceTree = "<group>"; };
 		D2605CF4144662150029F16B /* dropshadow_bottom_10@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dropshadow_bottom_10@2x.png"; sourceTree = "<group>"; };
 		D2605CF5144662150029F16B /* dropshadow_bottom_20@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dropshadow_bottom_20@2x.png"; sourceTree = "<group>"; };
 		D2605CF6144662150029F16B /* dropshadow_bottom_30@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dropshadow_bottom_30@2x.png"; sourceTree = "<group>"; };
@@ -524,7 +524,7 @@
 		AC312140108D363D00000D5F /* Include */ = {
 			isa = PBXGroup;
 			children = (
-				D2605CB414465F2C0029F16B /* UserVoice.h */,
+				644E0BA61460A5C7005EFF18 /* UserVoice.h */,
 			);
 			path = Include;
 			sourceTree = "<group>";
@@ -946,7 +946,7 @@
 				D261E056121456430024F2EA /* UVStreamPoller.h in Headers */,
 				D2BEEBB91367436D00EBC307 /* UVTicket.h in Headers */,
 				80B5291E13A16A2F008709D2 /* UVCustomField.h in Headers */,
-				D2605CB214465F2C0029F16B /* UserVoice.h in Headers */,
+				644E0BA51460A5C7005EFF18 /* UserVoice.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1093,18 +1093,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		D2605CB414465F2C0029F16B /* UserVoice.h */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D2605CB314465F2C0029F16B /* en */,
-			);
-			name = UserVoice.h;
-			path = Include;
-			sourceTree = SOURCE_ROOT;
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		1DEB921F08733DC00010E9CD /* Debug */ = {
