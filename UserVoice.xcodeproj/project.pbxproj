@@ -474,10 +474,6 @@
 				32C88DFF0371C24200C91783 /* Other Sources */,
 				0867D69AFE84028FC02AAC07 /* Frameworks */,
 				034768DFFF38A50411DB9C8B /* Products */,
-				AC61BF4B1089119500BCD3F2 /* CoreGraphics.framework */,
-				AC61BF4E1089119500BCD3F2 /* UIKit.framework */,
-				D2620D2D11B589FE0053EA4C /* SystemConfiguration.framework */,
-				D2C4B58E11C182CD00AD1C1A /* QuartzCore.framework */,
 			);
 			name = UserVoice;
 			sourceTree = "<group>";
@@ -485,6 +481,10 @@
 		0867D69AFE84028FC02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AC61BF4B1089119500BCD3F2 /* CoreGraphics.framework */,
+				AC61BF4E1089119500BCD3F2 /* UIKit.framework */,
+				D2620D2D11B589FE0053EA4C /* SystemConfiguration.framework */,
+				D2C4B58E11C182CD00AD1C1A /* QuartzCore.framework */,
 				AACBBE490F95108600F1A2B1 /* Foundation.framework */,
 			);
 			name = Frameworks;
