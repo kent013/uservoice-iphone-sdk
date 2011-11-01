@@ -63,5 +63,5 @@ typedef enum {
 #define HRLOG NSLog
 #else
 /// Logging Helper
-#define HRLOG    
+#define HRLOG(...) do {} while (0)
 #endif
