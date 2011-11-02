@@ -1100,7 +1100,6 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "";
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CONFIGURATION_BUILD_DIR = "$(BUILT_PRODUCTS_DIR)";
 				CONFIGURATION_TEMP_DIR = "$(BUILT_PRODUCTS_DIR)";
 				COPY_PHASE_STRIP = NO;
@@ -1126,7 +1125,6 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRIVATE_HEADERS_FOLDER_PATH = /usr/local/include/UserVoice;
 				PRODUCT_NAME = UserVoice;
-				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "Vendor/JSON/** Vendor/HTTPRiot/** Vendor/YOAuth/**";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1139,7 +1137,6 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "";
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CONFIGURATION_BUILD_DIR = "$(BUILT_PRODUCTS_DIR)";
 				CONFIGURATION_TEMP_DIR = "$(BUILT_PRODUCTS_DIR)";
 				CURRENT_PROJECT_VERSION = 0.1;
@@ -1162,7 +1159,6 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRIVATE_HEADERS_FOLDER_PATH = /usr/local/include/UserVoice;
 				PRODUCT_NAME = UserVoice;
-				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "Vendor/JSON/** Vendor/HTTPRiot/** Vendor/YOAuth/**";
 				VERSIONING_SYSTEM = "apple-generic";
