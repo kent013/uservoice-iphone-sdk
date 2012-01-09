@@ -1126,7 +1126,6 @@
 		1DEB921F08733DC00010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
 					armv7,
@@ -1136,7 +1135,6 @@
 				CONFIGURATION_TEMP_DIR = "$(BUILT_PRODUCTS_DIR)";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0.1;
-				DSTROOT = /tmp/UserVoice.dst;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Vendor\"",
@@ -1159,7 +1157,6 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRIVATE_HEADERS_FOLDER_PATH = /usr/local/include/UserVoice;
 				PRODUCT_NAME = UserVoice;
-				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "Vendor/JSON/** Vendor/HTTPRiot/** Vendor/YOAuth/**";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1170,7 +1167,6 @@
 		1DEB922008733DC00010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
 					armv7,
@@ -1179,7 +1175,6 @@
 				CONFIGURATION_BUILD_DIR = "$(BUILT_PRODUCTS_DIR)";
 				CONFIGURATION_TEMP_DIR = "$(BUILT_PRODUCTS_DIR)";
 				CURRENT_PROJECT_VERSION = 0.1;
-				DSTROOT = /tmp/UserVoice.dst;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Vendor\"",
@@ -1200,7 +1195,6 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRIVATE_HEADERS_FOLDER_PATH = /usr/local/include/UserVoice;
 				PRODUCT_NAME = UserVoice;
-				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				USER_HEADER_SEARCH_PATHS = "Vendor/JSON/** Vendor/HTTPRiot/** Vendor/YOAuth/**";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1211,7 +1205,6 @@
 		1DEB922308733DC00010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "";
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1229,7 +1222,6 @@
 		1DEB922408733DC00010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "";
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = 4.2;
