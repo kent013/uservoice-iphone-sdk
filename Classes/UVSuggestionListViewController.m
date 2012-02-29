@@ -17,11 +17,10 @@
 #import "UVInfoViewController.h"
 #import "UVStyleSheet.h"
 #import "UVUser.h"
-#import "UVFooterView.h"
 #import "UVTextEditor.h"
-#import "UVBaseGroupedCell.h"
 #import "UVCellViewWithIndex.h"
 #import "UVStreamPoller.h"
+#import "UVSuggestionButton.h"
 
 #define SUGGESTIONS_PAGE_SIZE 10
 #define UV_SEARCH_TEXTBAR 1
@@ -34,17 +33,16 @@
 @implementation UVSuggestionListViewController
 
 @synthesize forum = _forum;
-@synthesize prevLeftBarButton = _prevLeftBarButton;
 @synthesize textEditor = _textEditor;
+@synthesize suggestions;
 
 - (id)initWithForum:(UVForum *)theForum {
 	if ((self = [super init])) {
 		if (theForum.currentTopic.suggestions) {
 			self = [self initWithForum:theForum andSuggestions:theForum.currentTopic.suggestions];
-			
 		} else {
 			self.forum = theForum;
-		}	
+		}
 		_searching = NO;
 	}
 	return self;
@@ -60,7 +58,7 @@
 }
 
 - (NSString *)backButtonTitle {
-	return @"Ideas";
+	return NSLocalizedStringFromTable(@"Ideas", @"UserVoice", nil);
 }
 
 - (void)retrieveMoreSuggestions {
@@ -105,10 +103,6 @@
 	return YES;
 }
 
-- (BOOL)supportsFooter {
-	return YES;
-}
-
 - (void)addSuggestion:(UVCellViewWithIndex *)cellView {
 	UVNewSuggestionViewController *next = [[UVNewSuggestionViewController alloc] initWithForum:self.forum 
 																						 title:_textEditor.text];
@@ -131,7 +125,7 @@
 	UIFont *font = [UIFont boldSystemFontOfSize:18];
 	UILabel *label = [[UILabel alloc] init];
 	label.tag = UV_SEARCH_RESULTS_TAG_CELL_ADD_PREFIX;
-	label.text = @"Add \"";
+  label.text = [NSString stringWithFormat:@"%@ \"", NSLocalizedStringFromTable(@"Add", @"UserVoice", nil)];
 	label.font = font;
 	label.textAlignment = UITextAlignmentLeft;
 	label.textColor = [UVStyleSheet primaryTextColor];
@@ -167,7 +161,7 @@
 	cell.backgroundView.backgroundColor = [UVStyleSheet zebraBgColor:(indexPath.row % 2 == 0)];
 	
 	UIFont *font = [UIFont boldSystemFontOfSize:18];
-	NSString *text = [NSString stringWithFormat:@"Add \"%@\"", _textEditor.text];
+	NSString *text = [NSString stringWithFormat:@"%@ \"%@\"", NSLocalizedStringFromTable(@"Add", @"UserVoice", nil), _textEditor.text];
 	CGSize size = [text sizeWithFont:font forWidth:260 lineBreakMode:UILineBreakModeTailTruncation];
 	CGFloat startX = 30.0 + ((260.0 - size.width) / 2.0);
 	
@@ -191,22 +185,68 @@
 	label.frame = CGRectMake(prevEndX-1, 26, 10, 20);
 }
 
+- (void)initCellForSuggestion:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
+	// getting the cell size
+    //CGRect contentRect = cell.contentView.bounds;
+	CGFloat screenWidth = [UVClientConfig getScreenWidth];
+	CGRect contentRect = CGRectMake(0, 0, screenWidth, 71);
+	UVSuggestionButton *button = [[UVSuggestionButton alloc] initWithIndex:indexPath.row andFrame:contentRect];	
+    //	NSLog(@"Init suggestion with index: %d", indexPath.row);
+	
+	button.tag = UV_BASE_SUGGESTION_LIST_TAG_CELL_BACKGROUND;
+	[cell.contentView addSubview:button];
+	[button release];
+    
+	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+}
+
+- (void)customizeCellForSuggestion:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
+    //	NSLog(@"Customize suggestion with index: %d", indexPath.row);
+	
+	UVSuggestion *suggestion = [[self suggestions] objectAtIndex:(_searching ? indexPath.row-1 : indexPath.row)];
+	UVSuggestionButton *button = (UVSuggestionButton *)[cell.contentView viewWithTag:UV_BASE_SUGGESTION_LIST_TAG_CELL_BACKGROUND];
+	[button setZebraColorFromIndex:indexPath.row];
+	[button showSuggestion:suggestion withIndex:indexPath.row];
+}
+
+- (void)initCellForLoad:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
+	//NSLog(@"Load more index: %d", indexPath.row);
+	
+	//CGRect contentRect = cell.contentView.bounds;
+	CGFloat screenWidth = [UVClientConfig getScreenWidth];
+	CGRect contentRect = CGRectMake(0, 0, screenWidth, 71);
+	UVCellViewWithIndex *cellView = [[UVCellViewWithIndex alloc] initWithIndex:indexPath.row andFrame:contentRect];
+	[cellView setZebraColorFromIndex:indexPath.row];
+    
+	// Can't use built-in textLabel, as this forces a white background
+	UILabel *textLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 26, screenWidth, 20)];
+	textLabel.text = NSLocalizedStringFromTable(@"Load more ideas...", @"UserVoice", nil);
+	textLabel.textColor = [UVStyleSheet primaryTextColor];
+	textLabel.backgroundColor = [UIColor clearColor];
+	textLabel.font = [UIFont boldSystemFontOfSize:18];
+	textLabel.textAlignment = UITextAlignmentCenter;
+	[cell addSubview:textLabel];
+	[textLabel release];
+    
+	[cell.contentView addSubview:cellView];
+	[cellView release];
+}
+
+- (void)customizeCellForLoad:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
+	cell.backgroundView.backgroundColor = [UVStyleSheet zebraBgColor:(indexPath.row % 2 == 0)];
+}
+
 - (UITableViewCell *)tableView:(UITableView *)theTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	NSString *identifier;
 	BOOL selectable = YES;
 	UITableViewCellStyle style = UITableViewCellStyleDefault;
-	NSInteger suggestionsCount = [UVSession currentSession].clientConfig.forum.currentTopic.suggestionsCount;
-//	NSLog(@"%d, %d, %d", indexPath.row, [self.suggestions count], suggestionsCount);
 	
-	if (indexPath.row < [self.suggestions count]) {
+    if (indexPath.row == 0 && _searching)
+        identifier = @"Add";
+	else if (indexPath.row < (_searching ? [self.suggestions count] + 1 : [self.suggestions count]))
 		identifier = @"Suggestion";
-		
-	} else if (!_searching && (indexPath.row == [self.suggestions count]) &&  (suggestionsCount > [self.suggestions count])) {
+    else
 		identifier = @"Load";
-		
-	} else {
-		identifier = @"Add";
-	}		
 	return [self createCellForIdentifier:identifier
 							   tableView:theTableView
 							   indexPath:indexPath
@@ -242,29 +282,34 @@
 	return 71;
 }
 
-- (void)tableView:(UITableView *)theTableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath 
-{
+- (void)tableView:(UITableView *)theTableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [theTableView deselectRowAtIndexPath:indexPath animated:YES];
-    
-
-	NSInteger suggestionsCount = [UVSession currentSession].clientConfig.forum.currentTopic.suggestionsCount;
-	if (!_searching && (indexPath.row == [self.suggestions count]) && (suggestionsCount > [self.suggestions count]))
-	{
-		// This is the last row in the table, so it's the "Load more ideas" cell
-		[self retrieveMoreSuggestions];
-        
-	} else if (indexPath.row < [self.suggestions count]) {
-		// For all other rows, push appropriate suggestion details
-		[self pushSuggestionShowView:indexPath.row];
-        
-	} else {
+    if (indexPath.row == 0 && _searching) {
         UVNewSuggestionViewController *next = [[UVNewSuggestionViewController alloc] initWithForum:self.forum 
 																							 title:_textEditor.text];
 		[self.navigationController pushViewController:next animated:YES];
 		[next release];
+    } else if (indexPath.row < (_searching ? [self.suggestions count] + 1 : [self.suggestions count])) {
+        UVSuggestion *suggestion = [suggestions objectAtIndex:(_searching ? indexPath.row-1 : indexPath.row)];
+        UVSuggestionDetailsViewController *next = [[UVSuggestionDetailsViewController alloc] init];
+        next.suggestion = suggestion;
+        
+        [self.navigationController pushViewController:next animated:YES];
+        [next release];
+    } else {
+		// This is the last row in the table, so it's the "Load more ideas" cell
+		[self retrieveMoreSuggestions];
     }
 }
 
+- (void)pushSuggestionShowView:(NSInteger)index {
+	UVSuggestion *suggestion = [suggestions objectAtIndex:index];
+	UVSuggestionDetailsViewController *next = [[UVSuggestionDetailsViewController alloc] init];
+	next.suggestion = suggestion;
+	
+	[self.navigationController pushViewController:next animated:YES];
+	[next release];
+}
 
 - (void)setLeftBarButtonCancel {
 	UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
@@ -282,12 +327,9 @@
 	[clearItem release];
 }
 
-- (void)setLeftBarButtonPrevious {
-	[self.navigationItem setLeftBarButtonItem:self.prevLeftBarButton animated:NO];
-}
-
 - (void)resetList {
 	_searching = NO;
+    [self showExitButton];
 	_textEditor.text = @"";
 
 	[self.suggestions removeAllObjects];
@@ -316,6 +358,7 @@
 	
 	// Maximize header view to allow text editor to grow (leaving room for keyboard) 216
 	[self setLeftBarButtonCancel];	
+    [self hideExitButton];
 	textBar.frame = frame;
 	textBar.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.0];
 	theTextEditor.backgroundColor = [UIColor whiteColor];
@@ -358,7 +401,8 @@
 	
 	// Minimize text editor and header
 	[UIView beginAnimations:@"shrinkHeader" context:nil];
-	textBar.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.0];		
+	textBar.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.0];
+    
 	[UIView commitAnimations];	
 	textBar.frame = CGRectMake(0, 0, screenWidth, 40);
     
@@ -388,6 +432,10 @@
 	theTableView.sectionFooterHeight = 0.0;
 	theTableView.sectionHeaderHeight = 0.0;
     theTableView.backgroundColor = [UVStyleSheet backgroundColor];
+    
+    // Add empty footer, to suppress blank cells (with separators) after actual content
+	UIView *footer = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 0)] autorelease];
+	theTableView.tableFooterView = footer;
 	
 	[self addShadowSeparatorToTableView:theTableView];
 	
@@ -419,21 +467,6 @@
 	theTableView.tableHeaderView = headerView;
     [headerView release];
 	
-	if ([self supportsFooter]) {
-        //NSLog(@"altFooterViewForController");
-		theTableView.tableFooterView = [UVFooterView altFooterViewForController:self];
-		
-	} else {
-		UIView *bottomShadow = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 10)] autorelease];
-		UIImage *shadow = [UIImage imageNamed:@"dropshadow_bottom_30.png"];
-		CGFloat widthScale = screenWidth / shadow.size.width; // horizontal scaling factor to expand shadow image
-		UIImageView *shadowView = [[[UIImageView alloc] initWithImage:shadow] autorelease];
-		shadowView.transform = CGAffineTransformMakeScale(widthScale, 1.0); // rescale the shadow
-		shadowView.center = CGPointMake(screenWidth/2, shadowView.center.y); // recenter the upscaled shadow
-		[bottomShadow addSubview:shadowView];	
-		theTableView.tableFooterView = bottomShadow;
-	}
-	
 	self.tableView = theTableView;
 	[theTableView release];
 	self.view = tableView;
@@ -464,12 +497,6 @@
             [[UVStreamPoller instance] startTimer];
             [UVStreamPoller instance].lastPollTime = [NSDate date];
         }
-
-        if ([self supportsFooter]) {
-            // Reload footer view, in case the user has changed (logged in or unlinked)
-            UVFooterView *footer = (UVFooterView *) self.tableView.tableFooterView;
-            [footer reloadFooter];
-        }
     }
     [self.tableView reloadData];
     
@@ -490,8 +517,8 @@
 
 - (void)dealloc {
     self.forum = nil;
-    self.prevLeftBarButton = nil;
     self.textEditor = nil;
+    self.suggestions = nil;
     [super dealloc];
 }
 

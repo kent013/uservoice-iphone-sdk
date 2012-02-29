@@ -1,111 +1,51 @@
 Overview
-========
+--------
 
-IMPORTANT: The UserVoice iPhone SDK is currently in beta, if you wish to try it out please visit this url to request access:
+The UserVoice iOS SDK allows you to embed UserVoice directly in your iOS app.
+You will need to have a UserVoice account for it to connect to.
 
-http://www.uservoice.com/iphone
+Binary builds of the SDK are available [for download](https://github.com/uservoice/uservoice-iphone-sdk/downloads).
 
-The UserVoice iPhone SDK is distributed as a XCode Project which you can use to build static libraries to compile against. 
+We also have an [example app](https://github.com/uservoice/uservoice-iphone-example) on GitHub that demonstrates how to build and integrate the SDK.
 
-This distribution concept is well described in this post:
+Installation
+------------
 
-http://www.clintharris.net/2009/iphone-app-shared-libraries/
+* Download the latest build.
+* Drag `UVHeadeers`, `UVResources`, and `libUserVoice.a` into your project.
+* Note that the `.h` files in  `UVHeaders` do not need to be added to your target.
+* Add `-ObjC` to `Other Linker Flags` in the Build Settings for your target. (There is also an `Other Linker Flags` setting for your entire project, but that's not the one you want.)
 
-In order to embed the UserVoice functionality into your own iPhone app, you need to perform the following steps:
-
-1. Have a UserVoice account!
-2. Clone the SDK from GitHub (or download the zip)
-3. Add the SDK to your project (a simple drag'n'drop followed by updating a few settings)
-4. Add the UserVoice resources
-5. Register your iPhone app on the UserVoice website
-6. Add an '#import' and a single line of code where you want to invoke the UserVoice functionality
-
-The instructions below describe this process in more detail.
-
-
-Instructions
-============
-
-Thanks to Johan Williams for this blog post (made my life a lot easier):
-
-http://blog.carbonfive.com/2011/04/04/using-open-source-static-libraries-in-xcode-4/
-
-NB. THESE INSTRUCTIONS ONLY APPLY TO XCODE-4 (Last checked on 4.2), FOR XCODE-3 PLEASE CHECK OUT THE XCODE3 BRANCH AND README
-
-Adding the SDK to your project 
-------------------------------
-
-* Either create a new workspace and add your existing project, or just go to the file menu and save your existing project as a workspace.
-* Right click on the workspace's navigator and select "Add files to myworkspace" then navigate to the UserVoiceSDK project and select the UserVoice.xcodeproj file, this should create a secondary project in the workspace.
-
-
-Update Build Settings
----------------------
-
-* Select your app’s build target and go to the “Link Binary With Libraries” build phase.
-* Click add and select the UserVoice.a library from the Workspace dropdown
-* Locate the “User Header Search Paths” setting. Set this to “$(BUILT_PRODUCTS_DIR)”
-* Look for Other Linker Flags.
-* Double-click, then add "-ObjC".
-* Double-click, then add "-all_load".
-
-
-Add Resources
--------------
-
-* Create a group called UVResources
-* Right-click on UVResources, then choose Add -> Existing Files.
-* Select the "UserVoice/Resources" folder. In the dialog, leave "Copy items..." unchecked and then click Add.
-* Right-click on your project and choose Add -> Existing Files.
-* Select the Categories folder from the UserVoiceSDK directory. In the dialog, leave "Copy items..." unchecked and then click Add.
-
+See [DEV.md](https://github.com/uservoice/uservoice-iphone-sdk/blob/master/DEV.md) if you want to build the SDK yourself.
 
 Obtain Key And Secret
 ---------------------
 
-* Go to the admin section of your UserVoice account and click 'Apps & Plugins'.
-* Click on the iPhone tab and click create.
-* Make a note of your key and secret and of your forum URL.
+* Go to the admin section of your UserVoice account and click `Channels` under `Settings`.
+* Add an iOS App.
+* Copy the generated `Secret` and `API key`.
 
+API
+---
 
-Import UserVoiceSDK
--------------------
+Once you have completed these steps, you are ready to launch the UserVoice UI
+from your code. Import `UserVoice.h` and call one of the three methods on the
+UserVoice class.
 
-Add the following import statement to the class that is responsible for launching the UserVoice view (probably a view controller):
-
-
-    #import "UserVoice.h"
-	
-
-Invoke UserVoice View - Standard Login
---------------------------------------
-
-In your view controller, where you want to invoke the UserVoice view (probably from a button action), use the following code:
-
+**1. Standard Login:** This is the most basic option, which will allow users to
+either sign in, or create a UserVoice account, from inside the UserVoice UI.
+This is ideal if your app does not have any information about the user.
 
     [UserVoice presentUserVoiceModalViewControllerForParent:self
                                                     andSite:@"YOUR_USERVOICE_URL"
                                                      andKey:@"YOUR_KEY"
                                                   andSecret:@"YOUR_SECRET"];
 
-												  
-Invoke UserVoice View - SSO With Existing Users
------------------------------------------------
-
-In your view controller, where you want to invoke the UserVoice view (probably from a button action), use the following code:
-
-
-    [UserVoice presentUserVoiceModalViewControllerForParent:self
-                                                    andSite:@"YOUR_USERVOICE_URL"
-                                                     andKey:@"YOUR_KEY"
-                                                  andSecret:@"YOUR_SECRET",
-                                                andSSOToken:@"SOME_BIG_LONG_SSO_TOKEN"];
-
-
-Invoke UserVoice View - SSO With New Users Only
------------------------------------------------
-												  
-In your view controller, where you want to invoke the UserVoice view (probably from a button action), use the following code:
+**2. SSO for local users:** This will find or create a new user by passing a
+name, email, and unique id. However, it will only find users that were
+previously created using this method. It will not allow you to log the user in
+as an existing UserVoice account. This is ideal if you only want to use
+UserVoice with your iOS app.
 
     [UserVoice presentUserVoiceModalViewControllerForParent:self
                                                     andSite:@"YOUR_USERVOICE_URL"
@@ -115,12 +55,51 @@ In your view controller, where you want to invoke the UserVoice view (probably f
                                              andDisplayName:@"USER_DISPLAY_NAME"
                                                     andGUID:@"GUID"];
 
+**3. UserVoice SSO:** This is the most flexible option. It allows you to log
+the user in using a UserVoice SSO token. This is ideal if you are planning to
+use single signon with UserVoice across multiple platforms. We recommend you
+encrypt the token on your servers and pass it to the iOS app.
+
+    [UserVoice presentUserVoiceModalViewControllerForParent:self
+                                                    andSite:@"YOUR_USERVOICE_URL"
+                                                     andKey:@"YOUR_KEY"
+                                                  andSecret:@"YOUR_SECRET",
+                                                andSSOToken:@"SOME_BIG_LONG_SSO_TOKEN"];
+
 Feedback
 --------
 
-We are also using this great service for feedback, UserVoice....
+You can share feedback on the [UserVoice iOS SDK forum](http://feedback.uservoice.com/forums/64519-iphone-sdk-feedback).
 
-http://feedback.uservoice.com/forums/64519-iphone-sdk-feedback
+
+Translations
+------------
+
+Currently the UI is available in English and French. We are using
+[Twine](https://github.com/mobiata/twine) to manage the translations.
+
+To contribute to the translations, follow these steps:
+
+* Fork the project on Github
+* Edit the `strings.txt` file
+* Commit your changes and open a pull request
+
+If you want to go the extra mile and test your translations, do the following:
+
+* If you are adding a language:
+  * `mkdir Resources/YOURLOCALE.lproj`
+  * `touch Resources/YOURLOCALE.lproj/UserVoice.strings`
+* Install the `twine` gem
+* Run `./strings.sh` to generate the strings files
+* Run the example app (or your own app) to see how things look in the UI
+* Make note of any layout issues in your pull request so that we can look at it
+  and figure out what to do.
+
+Some strings that show up in the SDK come directly from the UserVoice API. If a
+translation is missing for a string that does not appear in the SDK codebase,
+you will need to contribute to the main [UserVoice translation
+site](http://translate.uservoice.com/).
+
 
 License
 -------
@@ -138,25 +117,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-
-TODO
-----
-
-## performance
-
-* Cache more info (client config?) to improve initial load time
-
-## functionality
-
-* Facebook and Google auth support
-* Add resend email confirmation functionality
-
-## appearance
-
-* Info button image is being cropped
-* Still some text cropping on descenders
-
-## architecture
-
-* Always store the token and just use type to figure out if its request or access

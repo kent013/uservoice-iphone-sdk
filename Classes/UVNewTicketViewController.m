@@ -13,7 +13,7 @@
 #import "UVUser.h"
 #import "UVClientConfig.h"
 #import "UVSubjectSelectViewController.h"
-#import "UVSuggestionListViewController.h"
+#import "UVNewSuggestionViewController.h"
 #import "UVSignInViewController.h"
 #import "UVClientConfig.h"
 #import "UVTicket.h"
@@ -23,162 +23,72 @@
 #import "UVTextEditor.h"
 #import "NSError+UVExtras.h"
 
-#define UV_NEW_TICKET_SECTION_PROFILE 0
-#define UV_NEW_TICKET_SECTION_SUBJECT 2
-#define UV_NEW_TICKET_SECTION_CUSTOM_FIELDS 1
-#define UV_NEW_TICKET_SECTION_TEXT 3
-#define UV_NEW_TICKET_SECTION_SUBMIT 4
+#define UV_NEW_TICKET_SECTION_TEXT 0
+#define UV_NEW_TICKET_SECTION_PROFILE 1
+#define UV_NEW_TICKET_SECTION_SUBMIT 2
+//#define UV_NEW_TICKET_SECTION_CUSTOM_FIELDS ??
 
 @implementation UVNewTicketViewController
 
-@synthesize text;
-@synthesize name;
-@synthesize email;
-@synthesize subject;
 @synthesize textEditor;
-@synthesize nameField;
 @synthesize emailField;
-@synthesize subjectField;
-@synthesize prevBarButton;
 @synthesize activeField;
+@synthesize initialText;
 
-- (void)createTicket 
-{
-	[self showActivityIndicator];
-	[UVTicket createWithSubject:self.subject andMessage:self.text andDelegate:self];
+- (id)initWithText:(NSString *)text {
+    if (self = [super init]) {
+        self.initialText = text;
+    }
+    return self;
+}
+
+// Used when deep-linking to contact form.
+- (id)initWithoutNavigation {
+    if (self = [super init]) {
+        withoutNavigation = YES;
+    }
+    return self;
 }
 
 - (void)dismissKeyboard {
-	// shouldResizeForKeyboard = YES;
-	
-	[nameField resignFirstResponder];
 	[emailField resignFirstResponder];
-    [subjectField resignFirstResponder];
 	[textEditor resignFirstResponder];
-	// shouldResizeForKeyboard = NO;
-}
-
-- (void)updateFromControls {
-	self.name = nameField.text;
-	self.email = emailField.text;
-	self.text = textEditor.text;
-    self.subject = subjectField.text;
-	
-	[self dismissKeyboard];
 }
 
 - (void)createButtonTapped {
-	[self updateFromControls];
+	[self dismissKeyboard];
+	NSString *email = emailField.text;
+	NSString *text = textEditor.text;	
 	
-	if ([UVSession currentSession].user) {
-		[self createTicket];
-		
+	if ([UVSession currentSession].user || (email && [email length] > 1)) {
+        [self showActivityIndicator];
+        [UVTicket createWithMessage:text andEmailIfNotLoggedIn:email andDelegate:self];
 	} else {
-		if (self.email && [self.email length] > 1) {
-			[self showActivityIndicator];
-			[UVUser findOrCreateWithEmail:self.email andName:self.name andDelegate:self];
-			
-		} else {
-			UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" 
-															message:@"Please enter your email address before submitting your ticket." 
-														   delegate:nil cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
-			[alert show];
-			[alert release];
-		}
-	}
-}
-
-- (void)didDiscoverUser:(UVUser *)theUser {
-	[self hideActivityIndicator];
-	
-	// add email to user as won't of been returned
-	theUser.email = self.emailField.text;
-	UVSignInViewController *signinView = [[UVSignInViewController alloc] initWithUVUser:theUser];
-	[self.navigationController pushViewController:signinView animated:YES];
-	[signinView release];
-}
-
-- (void)didCreateUser:(UVUser *)theUser {
-	[UVSession currentSession].user = theUser;
-	
-	// token should have been loaded by ResponseDelegate
-	[[UVSession currentSession].currentToken persist];
-	
-	[self createTicket];
-}
-
-- (void)didReceiveError:(NSError *)error {
-	[self hideActivityIndicator];
-	
-	if ([error isNotFoundError]) {
-		NSLog(@"No user");
-		// shouldResizeForKeyboard = YES;
-		[self.tableView reloadData];
-		// shouldResizeForKeyboard = NO;
-		
-	} else {
-		[super didReceiveError:error];
+        [self alertError:NSLocalizedStringFromTable(@"Please enter your email address before submitting your ticket.", @"UserVoice", nil)];
 	}
 }
 
 - (void)didCreateTicket:(UVTicket *)theTicket {
 	[self hideActivityIndicator];
-	
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-													message:@"Your ticket was successfully submitted."
-												   delegate:nil
-										  cancelButtonTitle:nil
-										  otherButtonTitles:@"OK", nil];
-	[alert show];
-	[alert release];
-	[self.navigationController popViewControllerAnimated:YES];
+    [self alertSuccess:NSLocalizedStringFromTable(@"Your ticket was successfully submitted.", @"UserVoice", nil)];
+    if (withoutNavigation)
+        [self dismissUserVoice];
+    else
+        [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)dismissTextView {
-	// shouldResizeForKeyboard = YES;
 	[self.textEditor resignFirstResponder];
-	// shouldResizeForKeyboard = NO;
-}
-
-- (void)checkEmail {		
-	if (self.emailField.text.length > 0) {
-		[self showActivityIndicatorWithText:@"Checking..."];
-		[UVUser discoverWithEmail:emailField.text delegate:self];
-	}
 }
 
 - (void)suggestionButtonTapped {
-	NSArray *viewControllers = self.navigationController.viewControllers;
-	UIViewController *prev = [viewControllers objectAtIndex:([viewControllers count] - 2)];
-	UINavigationController *navController = self.navigationController;
-	if ([prev class] == [UVSuggestionListViewController class]) {
-		// Previous view was already a suggestion list => simply pop view
-		[navController popViewControllerAnimated:YES];
-	} else {
-		// Previous view was something else => pop current view, then push suggestion list
-		[navController popViewControllerAnimated:NO];
-		UVForum *forum = [UVSession currentSession].clientConfig.forum;		
-		UIViewController *next = [[UVSuggestionListViewController alloc] initWithForum:forum];
-		[navController pushViewController:next animated:YES];
-		[next release];
-	}
-}
-
-//- (void) moveTextViewForKeyboard:(NSNotification*)aNotification up: (BOOL) up {
-- (void) moveTextViewForKeyboard:(BOOL) up {
-	// Animate up or down
-	[UIView beginAnimations:@"ResizeForKeyboard" context:nil];
-	[UIView setAnimationBeginsFromCurrentState:YES];
-	
-	CGRect newFrame = self.tableView.frame;
-	newFrame.size.height -= 216 * (up? 1 : -1);
-	self.tableView.frame = newFrame;
-	if (up) {	
-		// Scroll to the active text editor	
-		NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:UV_NEW_TICKET_SECTION_TEXT];
-		[self.tableView scrollToRowAtIndexPath:path atScrollPosition:UITableViewScrollPositionTop animated:YES];
-	}
-	[UIView commitAnimations];
+    NSMutableArray *viewControllers = [self.navigationController.viewControllers mutableCopy];
+    [viewControllers removeLastObject];
+    UVForum *forum = [UVSession currentSession].clientConfig.forum;		
+    UIViewController *next = [[UVNewSuggestionViewController alloc] initWithForum:forum title:self.textEditor.text];
+    [viewControllers addObject:next];
+	[self.navigationController setViewControllers:viewControllers animated:YES];
+    [viewControllers release];
 }
 
 #pragma mark ===== UITextFieldDelegate Methods =====
@@ -187,17 +97,8 @@
     self.activeField = textField;
 }
 
-- (BOOL)textFieldShouldEndEditing:(UITextField *)textField {
-	if (textField==emailField) {
-		NSLog(@"Check email");
-		[self checkEmail];
-	}
-	return YES;
-}
-
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
 	[textField resignFirstResponder];
-	
 	return YES;
 }
 
@@ -214,16 +115,16 @@
 - (void)textEditorDidBeginEditing:(UVTextEditor *)theTextEditor {
 	// Change right bar button to Done, as there's no built-in way to dismiss the
 	// text view's keyboard.
-	UIBarButtonItem* saveItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-																			  target:self action:@selector(dismissTextView)];
-	self.prevBarButton = self.navigationItem.leftBarButtonItem;
-	[self.navigationItem setLeftBarButtonItem:saveItem animated:YES];
-	[saveItem release];
+    [self hideExitButton];
+    UIBarButtonItem* saveItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                               target:self
+                                                                               action:@selector(dismissTextView)] autorelease];
+	[self.navigationItem setRightBarButtonItem:saveItem animated:NO];
     self.activeField = theTextEditor;
 }
 
 - (void)textEditorDidEndEditing:(UVTextEditor *)theTextEditor {
-	[self.navigationItem setLeftBarButtonItem:self.prevBarButton animated:YES];
+    [self showExitButton];
     self.activeField = nil;
 }
 
@@ -257,7 +158,8 @@
 	aTextEditor.maxNumberOfLines = 6;
 	aTextEditor.autoresizesToText = YES;
 	aTextEditor.backgroundColor = [UIColor clearColor];
-	aTextEditor.placeholder = @"Message";
+	aTextEditor.placeholder = NSLocalizedStringFromTable(@"Message", @"UserVoice", nil);
+    aTextEditor.text = initialText;
 	
 	[cell.contentView addSubview:aTextEditor];
 	self.textEditor = aTextEditor;
@@ -268,31 +170,15 @@
 	NSArray *fields = [UVSession currentSession].clientConfig.customFields;
 	if (fields && [fields count] > 0) {
 		cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-        cell.textLabel.text = @"Type";
+        cell.textLabel.text = NSLocalizedStringFromTable(@"Type", @"UserVoice", nil);
         
 	} else {
 		cell.accessoryType = UITableViewCellAccessoryNone;
 	}	
 }
 
-- (void)initCellForSubject:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
-    cell.textLabel.text = @"";
-	UITextField *textField = [[UITextField alloc] initWithFrame:CGRectMake(10, 11, 230, 22)];
-	textField.placeholder = @"Subject";
-	textField.returnKeyType = UIReturnKeyDone;
-	textField.borderStyle = UITextBorderStyleNone;
-	textField.backgroundColor = [UIColor clearColor];
-	textField.delegate = self;
-	[cell.contentView addSubview:textField];
-	self.subjectField = [textField autorelease];
-}
-
-- (void)initCellForName:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
-	self.nameField = [self customizeTextFieldCell:cell label:@"Name" placeholder:@"Anonymous"];
-}
-
 - (void)initCellForEmail:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
-	self.emailField = [self customizeTextFieldCell:cell label:@"Email" placeholder:@"Required"];
+	self.emailField = [self customizeTextFieldCell:cell label:NSLocalizedStringFromTable(@"Email", @"UserVoice", nil) placeholder:NSLocalizedStringFromTable(@"Required", @"UserVoice", nil)];
 	self.emailField.keyboardType = UIKeyboardTypeEmailAddress;
 	self.emailField.autocorrectionType = UITextAutocorrectionTypeNo;
 	self.emailField.autocapitalizationType = UITextAutocapitalizationTypeNone;
@@ -307,7 +193,7 @@
 	button.frame = CGRectMake(0, 0, 300, 42);
 	button.titleLabel.font = [UIFont boldSystemFontOfSize:18];
 	button.titleLabel.textColor = [UIColor whiteColor];
-	[button setTitle:@"Send" forState:UIControlStateNormal];
+	[button setTitle:NSLocalizedStringFromTable(@"Send", @"UserVoice", nil) forState:UIControlStateNormal];
 	[button setBackgroundImage:[UIImage imageNamed:@"uv_primary_button_green.png"] forState:UIControlStateNormal];
 	[button setBackgroundImage:[UIImage imageNamed:@"uv_primary_button_green_active.png"] forState:UIControlStateHighlighted];
 	[button addTarget:self action:@selector(createButtonTapped) forControlEvents:UIControlEventTouchUpInside];
@@ -323,9 +209,6 @@
 	BOOL selectable = NO;
 	
 	switch (indexPath.section) {
-		case UV_NEW_TICKET_SECTION_SUBJECT:
-			identifier = @"Subject";
-			break;
 //        case UV_NEW_TICKET_SECTION_CUSTOM_FIELDS
 //            identifier = 
 //            style = UITableViewCellStyleValue1;
@@ -336,7 +219,7 @@
 			identifier = @"Text";
 			break;
 		case UV_NEW_TICKET_SECTION_PROFILE:
-			identifier = indexPath.row == 0 ? @"Email" : @"Name";
+			identifier = @"Email";
 			break;
 		case UV_NEW_TICKET_SECTION_SUBMIT:
 			identifier = @"Submit";
@@ -358,7 +241,7 @@
 //    } else {
 //        return 4;
 //    }
-    return 5;
+    return 3;
 }
 
 - (NSInteger)tableView:(UITableView *)theTableView numberOfRowsInSection:(NSInteger)section {
@@ -366,10 +249,10 @@
 		if ([UVSession currentSession].user!=nil) {
 			return 0;
 		} else {
-			return 2;
+			return 1;
 		}
-	} else if (section == UV_NEW_TICKET_SECTION_CUSTOM_FIELDS) {        
-        return 0;
+//	} else if (section == UV_NEW_TICKET_SECTION_CUSTOM_FIELDS) {
+//        return 0;
 //		NSArray *subjects = [UVSession currentSession].clientConfig.customFields;
 //        
 //        NSLog(@"Custom Fields: %@", subjects);
@@ -400,23 +283,6 @@
 	}
 }
 
-- (CGFloat)tableView:(UITableView *)theTableView heightForHeaderInSection:(NSInteger)section {
-	switch (section) {
-		case UV_NEW_TICKET_SECTION_SUBJECT:
-			return 10.0;
-		case UV_NEW_TICKET_SECTION_PROFILE:
-			return 0.0;
-		default:
-			return 0.0;
-	}
-}
-
-- (UIView *)tableView:(UITableView *)theTableView viewForHeaderInSection:(NSInteger)section {
-	CGFloat height = [self tableView:theTableView heightForHeaderInSection:section];
-	CGFloat screenWidth = [UVClientConfig getScreenWidth];
-	return [[[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, height)] autorelease];
-}
-
 - (void)tableView:(UITableView *)theTableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 	
@@ -436,10 +302,8 @@
     [super keyboardDidShow:notification];
     
     NSIndexPath *path;
-    if (activeField == emailField || activeField == nameField)
+    if (activeField == emailField)
         path = [NSIndexPath indexPathForRow:0 inSection:UV_NEW_TICKET_SECTION_PROFILE];
-    else if (activeField == subjectField)
-        path = [NSIndexPath indexPathForRow:0 inSection:UV_NEW_TICKET_SECTION_SUBJECT];
     else
         path = [NSIndexPath indexPathForRow:0 inSection:UV_NEW_TICKET_SECTION_TEXT];
     [tableView scrollToRowAtIndexPath:path atScrollPosition:UITableViewScrollPositionTop animated:YES];
@@ -449,7 +313,7 @@
 
 - (void)loadView {
 	[super loadView];	
-	self.navigationItem.title = @"Contact Us";
+	self.navigationItem.title = NSLocalizedStringFromTable(@"Contact Us", @"UserVoice", nil);
 	
 	CGRect frame = [self contentFrame];
 	CGFloat screenWidth = [UVClientConfig getScreenWidth];
@@ -460,30 +324,32 @@
 	theTableView.sectionFooterHeight = 0.0;
 	theTableView.backgroundColor = [UVStyleSheet backgroundColor];
 	
-	UIView *footer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 50)];
-	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 10, screenWidth, 15)];
-	label.text = @"Want to suggest an idea instead?";
-	label.textAlignment = UITextAlignmentCenter;
-	label.textColor = [UVStyleSheet linkTextColor];
-	label.backgroundColor = [UIColor clearColor];
-	label.font = [UIFont systemFontOfSize:13];
-	[footer addSubview:label];
-	[label release];
-	
-	UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-	button.frame = CGRectMake(0, 25, 320, 15);
-	NSString *buttonTitle = [[UVSession currentSession].clientConfig.forum prompt];
-	[button setTitle:buttonTitle forState:UIControlStateNormal];
-	[button setTitleColor:[UVStyleSheet linkTextColor] forState:UIControlStateNormal];
-	button.backgroundColor = [UIColor clearColor];
-	button.showsTouchWhenHighlighted = YES;
-	button.titleLabel.font = [UIFont boldSystemFontOfSize:13];
-	[button addTarget:self action:@selector(suggestionButtonTapped) forControlEvents:UIControlEventTouchUpInside];
-	button.center = CGPointMake(footer.center.x, button.center.y);
-	[footer addSubview:button];
-	
-	theTableView.tableFooterView = footer;
-	[footer release];
+    if (!withoutNavigation) {
+        UIView *footer = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 50)];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 10, screenWidth, 15)];
+        label.text = NSLocalizedStringFromTable(@"Want to suggest an idea instead?", @"UserVoice", nil);
+        label.textAlignment = UITextAlignmentCenter;
+        label.textColor = [UVStyleSheet linkTextColor];
+        label.backgroundColor = [UIColor clearColor];
+        label.font = [UIFont systemFontOfSize:13];
+        [footer addSubview:label];
+        [label release];
+        
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.frame = CGRectMake(0, 25, 320, 15);
+        NSString *buttonTitle = [[UVSession currentSession].clientConfig.forum prompt];
+        [button setTitle:buttonTitle forState:UIControlStateNormal];
+        [button setTitleColor:[UVStyleSheet linkTextColor] forState:UIControlStateNormal];
+        button.backgroundColor = [UIColor clearColor];
+        button.showsTouchWhenHighlighted = YES;
+        button.titleLabel.font = [UIFont boldSystemFontOfSize:13];
+        [button addTarget:self action:@selector(suggestionButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+        button.center = CGPointMake(footer.center.x, button.center.y);
+        [footer addSubview:button];
+        
+        theTableView.tableFooterView = footer;
+        [footer release];
+    }
 	
 	self.tableView = theTableView;
 	[theTableView release];
@@ -493,26 +359,12 @@
 
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
-	if (self.needsReload) {
-		[self.tableView reloadData];
-		self.needsReload = NO;
-		
-		NSArray *viewControllers = [self.navigationController viewControllers];
-		UVBaseViewController *prev = (UVBaseViewController *)[viewControllers objectAtIndex:[viewControllers count] - 2];
-		prev.needsReload = YES;	
-	}
+    [textEditor becomeFirstResponder];
 }
 
 - (void)dealloc {
-    self.text = nil;
-    self.name = nil;
-    self.email = nil;
-    self.subject = nil;
 	self.textEditor = nil;
-	self.nameField = nil;
 	self.emailField = nil;
-	self.subjectField = nil;
-	self.prevBarButton = nil;
     self.activeField = nil;
     [super dealloc];
 }

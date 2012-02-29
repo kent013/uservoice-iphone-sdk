@@ -15,7 +15,6 @@
 #import "UVSuggestion.h"
 #import "UVResponseViewController.h"
 #import "UVSuggestionChickletView.h"
-#import "UVFooterView.h"
 #import "UVUserButton.h"
 #import "UVUser.h"
 #import "UVClientConfig.h"
@@ -45,24 +44,29 @@
 }
 	
 - (NSString *)backButtonTitle {
-	return @"Idea";
+	return NSLocalizedStringFromTable(@"Idea", @"UserVoice", nil);
 }
 
 - (void)voteSegmentChanged:(id)sender {
 	UISegmentedControl *segments = (UISegmentedControl *)sender;
-	if (segments.selectedSegmentIndex != self.suggestion.votesFor) {		
-		[self showActivityIndicator];
+    if ([UVSession currentSession].user != nil) {
+        if (segments.selectedSegmentIndex != self.suggestion.votesFor) {		
+            [self showActivityIndicator];
 
-        // Inform the user model
-		if (segments.selectedSegmentIndex == 0 && self.suggestion.votesFor > 0) {
-            [[UVSession currentSession].user didWithdrawSupportForSuggestion:self.suggestion];			
-		} else if (self.suggestion.votesFor == 0) {
-            [[UVSession currentSession].user didSupportSuggestion:self.suggestion];			
-		}
+            // Inform the user model
+            if (segments.selectedSegmentIndex == 0 && self.suggestion.votesFor > 0) {
+                [[UVSession currentSession].user didWithdrawSupportForSuggestion:self.suggestion];			
+            } else if (self.suggestion.votesFor == 0) {
+                [[UVSession currentSession].user didSupportSuggestion:self.suggestion];			
+            }
 
-		self.suggestion.votesFor = segments.selectedSegmentIndex;
-		[self.suggestion vote:segments.selectedSegmentIndex delegate:self];
-	}
+            self.suggestion.votesFor = segments.selectedSegmentIndex;
+            [self.suggestion vote:segments.selectedSegmentIndex delegate:self];
+        }
+    } else {
+        segments.selectedSegmentIndex = -1;
+        [self promptUserToSignIn];
+    }
 }
 
 - (void)didVoteForSuggestion:(UVSuggestion *)theSuggestion {		
@@ -86,24 +90,16 @@
 }
 
 - (void)promptForFlag {
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Flag Idea?"
-													message:@"Are you sure you want to flag this idea as inappropriate?"
-												   delegate:self
-										  cancelButtonTitle:@"Cancel"
-										  otherButtonTitles:@"Flag", nil];
-	[alert show];
-	[alert release];
+	[[[[UIAlertView alloc] initWithTitle:NSLocalizedStringFromTable(@"Flag Idea?", @"UserVoice", nil)
+                                 message:NSLocalizedStringFromTable(@"Are you sure you want to flag this idea as inappropriate?", @"UserVoice", nil)
+                                delegate:self
+                       cancelButtonTitle:NSLocalizedStringFromTable(@"Cancel", @"UserVoice", nil)
+                       otherButtonTitles:NSLocalizedStringFromTable(@"Flag", @"UserVoice", nil), nil] autorelease] show];
 }
 
 - (void)didFlagSuggestion:(UVSuggestion *)theSuggestion {
 	[self hideActivityIndicator];
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-													message:@"You have successfully flagged this idea as inappropriate."
-												   delegate:nil
-										  cancelButtonTitle:nil
-										  otherButtonTitles:@"OK", nil];
-	[alert show];
-	[alert release];
+    [self alertSuccess:NSLocalizedStringFromTable(@"You have successfully flagged this idea as inappropriate.", @"UserVoice", nil)];
 }
 
 // Calculates the height of the text.
@@ -172,15 +168,15 @@
 		label.textAlignment = UITextAlignmentCenter;
 		label.font = [UIFont systemFontOfSize:14];
 		label.text = [NSString stringWithFormat:
-					  @"Voting for this suggestion is now closed and your %d %@ been returned to you",
+					  NSLocalizedStringFromTable(@"Voting for this suggestion is now closed and your %d %@ been returned to you", @"UserVoice", nil),
 					  self.suggestion.votesFor,
-					  self.suggestion.votesFor == 1 ? @"vote has" : @"votes have"];
+					  self.suggestion.votesFor == 1 ? NSLocalizedStringFromTable(@"vote has", @"UserVoice", nil) : NSLocalizedStringFromTable(@"votes have", @"UserVoice", nil)];
 		label.textColor = [UVStyleSheet linkTextColor];
 		[cell.contentView addSubview:label];
 		[label release];
 		
 	} else {
-		NSArray *items = [NSArray arrayWithObjects:@"0 votes", @"1 vote", @"2 votes", @"3 votes", nil];
+		NSArray *items = [NSArray arrayWithObjects:NSLocalizedStringFromTable(@"0 votes", @"UserVoice", nil), NSLocalizedStringFromTable(@"1 vote", @"UserVoice", nil), NSLocalizedStringFromTable(@"2 votes", @"UserVoice", nil), NSLocalizedStringFromTable(@"3 votes", @"UserVoice", nil), nil];
 		UISegmentedControl *segments = [[UISegmentedControl alloc] initWithItems:items];
 		segments.tag = VOTE_SEGMENTS_TAG;
 		segments.frame = CGRectMake(0, 0, screenWidth - 2 * margin, 44);
@@ -203,8 +199,6 @@
 - (void)customizeCellForVote:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
     UISegmentedControl *segments = (UISegmentedControl *)[cell.contentView viewWithTag:VOTE_SEGMENTS_TAG];
 	if ([UVSession currentSession].user != nil) {
-        [[cell.contentView viewWithTag:LOGIN_TAG] removeFromSuperview];
-        
 		segments.selectedSegmentIndex = self.suggestion.votesFor;
 		NSInteger votesRemaining = [UVSession currentSession].clientConfig.forum.currentTopic.votesRemaining;
 		for (int i = 0; i < segments.numberOfSegments; i++) {
@@ -216,23 +210,9 @@
 		UILabel *label = (UILabel *)[cell.contentView viewWithTag:VOTE_LABEL_TAG];
 		if (label) 
 			[self setVoteLabelTextAndColorForLabel:label];
-        [segments setEnabled:YES];
 	} else {
-        [segments setEnabled:NO];
-        if ([cell.contentView viewWithTag:LOGIN_TAG] == NULL) {
-            CGFloat screenWidth = [UVClientConfig getScreenWidth];
-            CGFloat margin = screenWidth > 480 ? 45 : 10;
-            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 46, screenWidth - 2 * margin, 20)];
-            label.textAlignment = UITextAlignmentCenter;
-            label.font = [UIFont boldSystemFontOfSize:12];
-            label.tag = LOGIN_TAG;
-            label.text = @"Please sign in to vote.";	
-            label.backgroundColor = [UIColor clearColor];
-            label.textColor = [UVStyleSheet alertTextColor];
-            
-            [cell.contentView addSubview:label];
-            [label release];
-        }
+		UILabel *label = (UILabel *)[cell.contentView viewWithTag:VOTE_LABEL_TAG];
+        [label setHidden:YES];
     }
 }
 
@@ -261,7 +241,7 @@
 
 - (void)customizeCellForStatus:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
 	NSString *status = suggestion.status ? suggestion.status : @"N/A";
-	cell.textLabel.text = [NSString stringWithFormat:@"Status: %@", [status capitalizedString]];
+	cell.textLabel.text = [NSString stringWithFormat:NSLocalizedStringFromTable(@"Status: %@", @"UserVoice", nil), [status capitalizedString]];
 	
 	if (self.suggestion.responseText) {
 		cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -272,13 +252,13 @@
 }
 
 - (void)customizeCellForComments:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
-	cell.textLabel.text = [NSString stringWithFormat:(self.suggestion.commentsCount == 1 ? @"%d Comment" : @"%d Comments"), self.suggestion.commentsCount];
+	cell.textLabel.text = [NSString stringWithFormat:(self.suggestion.commentsCount == 1 ? NSLocalizedStringFromTable(@"%d Comment", @"UserVoice", nil) : NSLocalizedStringFromTable(@"%d Comments", @"UserVoice", nil)), self.suggestion.commentsCount];
 	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	cell.selectionStyle = UITableViewCellSelectionStyleBlue;
 }
 
 - (void)customizeCellForFlag:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
-	cell.textLabel.text = @"Flag as inappropriate";
+	cell.textLabel.text = NSLocalizedStringFromTable(@"Flag as inappropriate", @"UserVoice", nil);
 }
 
 - (void)initCellForCreator:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
@@ -291,12 +271,12 @@
 	[bg release];
 	
 	// Name label
-	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 13, 85, 16)];
+	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 13, 100, 16)];
 	label.backgroundColor = [UIColor clearColor];
 	label.textColor = [UVStyleSheet labelTextColor];
 	label.textAlignment = UITextAlignmentRight;
 	label.font = [UIFont boldSystemFontOfSize:13];
-	label.text = @"Created by";
+	label.text = NSLocalizedStringFromTable(@"Created by", @"UserVoice", nil);
 	[cell.contentView addSubview:label];
 	[label release];
 
@@ -304,24 +284,24 @@
 	UVUserButton *nameButton = [UVUserButton buttonWithUserId:self.suggestion.creatorId
 														 name:self.suggestion.creatorName
 												   controller:self
-													   origin:CGPointMake(95, 13)
+													   origin:CGPointMake(110, 13)
 													 maxWidth:205
 														 font:[UIFont boldSystemFontOfSize:13]
 														color:[UVStyleSheet linkTextColor]];
 	[cell.contentView addSubview:nameButton];
 	
 	// Date label
-	label = [[UILabel alloc] initWithFrame:CGRectMake(0, 43, 85, 13)];
+	label = [[UILabel alloc] initWithFrame:CGRectMake(0, 43, 100, 13)];
 	label.backgroundColor = [UIColor clearColor];
 	label.textColor = [UVStyleSheet labelTextColor];
 	label.textAlignment = UITextAlignmentRight;
 	label.font = [UIFont boldSystemFontOfSize:13];
-	label.text = @"Post date";
+	label.text = NSLocalizedStringFromTable(@"Post date", @"UserVoice", nil);
 	[cell.contentView addSubview:label];
 	[label release];
 
 	// Date
-	label = [[UILabel alloc] initWithFrame:CGRectMake(95, 43, 205, 14)];
+	label = [[UILabel alloc] initWithFrame:CGRectMake(110, 43, 205, 14)];
 	label.backgroundColor = [UIColor clearColor];
 	label.textColor = [UVStyleSheet primaryTextColor];
 	label.textAlignment = UITextAlignmentLeft;
@@ -408,14 +388,6 @@
 	UIViewController *next = nil;
 
 	switch (indexPath.section) {
-		case UV_SUGGESTION_DETAILS_SECTION_VOTE: {
-			if ([UVSession currentSession].user==nil) {
-				UVSignInViewController *next = [[UVSignInViewController alloc] init];
-				[self.navigationController pushViewController:next animated:YES];
-				[next release];
-			}
-			break;
-		}
 		case UV_SUGGESTION_DETAILS_SECTION_COMMENTS: {
 			switch (indexPath.row) {
 				case 0: // status
@@ -506,7 +478,6 @@
     	
 	theTableView.tableHeaderView = headerView;
     [headerView release];
-	theTableView.tableFooterView = [UVFooterView footerViewForController:self];
 		
 	self.tableView = theTableView;
 	self.view = theTableView;
@@ -522,9 +493,6 @@
 	} else {
 		[chicklet updateWithSuggestion:self.suggestion style:UVSuggestionChickletStyleEmpty];
 	}
-    
-    UVFooterView *footer = (UVFooterView *) self.tableView.tableFooterView;
-    [footer reloadFooter];
     [super viewWillAppear:animated];
 }
 

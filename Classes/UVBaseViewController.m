@@ -18,13 +18,15 @@
 #import "NSError+UVExtras.h"
 #import "UVStreamPoller.h"
 #import "UVImageCache.h"
+#import "UserVoice.h"
+#import "UVSignInViewController.h"
 
 @implementation UVBaseViewController
 
-@synthesize activityIndicator,
-	errorAlertView;
+@synthesize activityIndicator;
 @synthesize needsReload;
 @synthesize tableView;
+@synthesize exitButton;
 
 - (void)dismissUserVoice {
     if ([UVStreamPoller instance].timerIsRunning)
@@ -32,6 +34,8 @@
     [[UVImageCache sharedInstance] flush];
 
 	[self dismissModalViewControllerAnimated:YES];
+    if ([[UserVoice delegate] respondsToSelector:@selector(userVoiceWasDismissed)])
+        [[UserVoice delegate] userVoiceWasDismissed];
 }
 
 - (CGRect)contentFrameWithNavBar:(BOOL)navBarEnabled {
@@ -78,55 +82,71 @@
 - (void)setVoteLabelTextAndColorForVotesRemaining:(NSInteger)votesRemaining label:(UILabel *)label {
 	if ([UVSession currentSession].user) {
 		if (votesRemaining == 0) {
-			label.text = @"Sorry, you have no more votes remaining in this forum.";
+			label.text = NSLocalizedStringFromTable(@"Sorry, you have no more votes remaining in this forum.", @"UserVoice", nil);
 			label.textColor = [UVStyleSheet alertTextColor];
 		} else {
-			label.text = [NSString stringWithFormat:@"You have %d %@ remaining in this forum",
+			label.text = [NSString stringWithFormat:NSLocalizedStringFromTable(@"You have %d %@ remaining in this forum", @"UserVoice", @"%d for number of votes, %@ for pluralization of 'votes'"),
 						  votesRemaining,
-						  votesRemaining == 1 ? @"vote" : @"votes"];
+						  votesRemaining == 1 ? NSLocalizedStringFromTable(@"vote", @"UserVoice", nil) : NSLocalizedStringFromTable(@"votes", @"UserVoice", nil)];
 			label.textColor = [UVStyleSheet linkTextColor];
 		}
 	} else {
 		label.font = [UIFont boldSystemFontOfSize:14];
-		label.text = @"You will need to sign in to vote.";
+		label.text = NSLocalizedStringFromTable(@"You will need to sign in to vote.", @"UserVoice", nil);
 		label.textColor = [UVStyleSheet alertTextColor];
-	}
+    }
 }
 
-- (void)showErrorAlertViewWithMessage:(NSString *)message
-{
-	[self setupErrorAlertViewWithMessage:message];
-	[self setupErrorAlertViewDelegate];
-	[errorAlertView show];
+- (void)alertError:(NSString *)message {
+	[[[[UIAlertView alloc] initWithTitle:NSLocalizedStringFromTable(@"Error", @"UserVoice", nil)
+                                message:message
+                               delegate:nil
+                      cancelButtonTitle:NSLocalizedStringFromTable(@"OK", @"UserVoice", nil)
+                      otherButtonTitles:nil] autorelease] show];
 }
 
-- (UIAlertView *)setupErrorAlertViewWithMessage:(NSString *)message
-{
-	self.errorAlertView = [[[UIAlertView alloc] initWithTitle:@"Error" message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
-	return errorAlertView;
-}
-
-- (void)setupErrorAlertViewDelegate
-{
+- (void)alertSuccess:(NSString *)message {
+	[[[[UIAlertView alloc] initWithTitle:NSLocalizedStringFromTable(@"Success", @"UserVoice", nil)
+                                 message:message
+                                delegate:nil
+                       cancelButtonTitle:NSLocalizedStringFromTable(@"OK", @"UserVoice", nil)
+                       otherButtonTitles:nil] autorelease] show];
 }
 
 - (void)didReceiveError:(NSError *)error {
 	[self hideActivityIndicator];
 	NSString *msg = nil;
 	if ([UVNetworkUtils hasInternetAccess] && ![error isConnectionError]) {
-		msg = @"Sorry, there was an error in the application.";
+        NSDictionary *userInfo = [error userInfo];
+        for (NSString *key in [userInfo allKeys]) {
+            if ([key isEqualToString:@"message"] || [key isEqualToString:@"type"])
+                continue;
+            NSString *displayKey = nil;
+            if ([key isEqualToString:@"display_name"])
+                displayKey = NSLocalizedStringFromTable(@"User name", @"UserVoice", nil);
+            else
+                displayKey = [[key stringByReplacingOccurrencesOfString:@"_" withString:@" "] capitalizedString];
+
+            // Suggestion title has custom messages
+            if ([key isEqualToString:@"title"])
+                msg = [userInfo valueForKey:key];
+            else
+                msg = [NSString stringWithFormat:@"%@ %@", displayKey, [userInfo valueForKey:key], nil];
+        }
+        if (!msg)
+            msg = NSLocalizedStringFromTable(@"Sorry, there was an error in the application.", @"UserVoice", nil);
 	} else {
-		msg = @"There appears to be a problem with your network connection, please check your connectivity and try again.";
+		msg = NSLocalizedStringFromTable(@"There appears to be a problem with your network connection, please check your connectivity and try again.", @"UserVoice", nil);
 	}
-	[self showErrorAlertViewWithMessage:msg];
+	[self alertError:msg];
 }
 
 - (NSString *)backButtonTitle {
-	return @"Back";
+	return NSLocalizedStringFromTable(@"Back", @"UserVoice", nil);
 }
 
 - (void)initNavigationItem {
-	self.navigationItem.title = @"Feedback";
+	self.navigationItem.title = NSLocalizedStringFromTable(@"Feedback", @"UserVoice", nil);
 	
 	UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
 								   initWithTitle:[self backButtonTitle]
@@ -137,13 +157,11 @@
 	[backButton release];
 	
 	if ([UVSession currentSession].isModal) {
-		UIBarButtonItem *exitButton = [[UIBarButtonItem alloc]
-									   initWithTitle:@"Close"
-									   style:UIBarButtonItemStylePlain
-									   target:self
-									   action:@selector(dismissUserVoice)];
+		self.exitButton = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedStringFromTable(@"Close", @"UserVoice", nil)
+                                                            style:UIBarButtonItemStylePlain
+                                                           target:self
+                                                           action:@selector(dismissUserVoice)] autorelease];
 		self.navigationItem.rightBarButtonItem = exitButton;
-		[exitButton release];
 	}
 }
 
@@ -234,10 +252,18 @@
     tableView.scrollIndicatorInsets = contentInsets;
 }
 
-- (void)setErrorAlertView:(UIAlertView *)anErrorAlertView {
-    errorAlertView.delegate = nil;
-    [errorAlertView release];
-    errorAlertView = [anErrorAlertView retain];
+- (void)hideExitButton {
+    self.navigationItem.rightBarButtonItem = nil;
+}
+
+- (void)showExitButton {
+    if (exitButton)
+        self.navigationItem.rightBarButtonItem = exitButton;
+}
+
+- (void)promptUserToSignIn {
+    UVSignInViewController *signInView = [[[UVSignInViewController alloc] init] autorelease];
+    [self.navigationController pushViewController:signInView animated:YES];
 }
 
 #pragma mark ===== Basic View Methods =====
@@ -263,14 +289,13 @@
 }
 
 - (void)viewDidUnload {
-	self.errorAlertView = nil;
 	self.activityIndicator = nil;
 }
 
 - (void)dealloc {
-    self.errorAlertView = nil;
     self.activityIndicator = nil;
     self.tableView = nil;
+    self.exitButton = nil;
     [super dealloc];
 }
 

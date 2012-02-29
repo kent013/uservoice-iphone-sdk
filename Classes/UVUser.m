@@ -112,7 +112,7 @@
 + (id)findOrCreateWithGUID:(NSString *)aGUID andEmail:(NSString *)anEmail andName:(NSString *)aName andDelegate:(id)delegate {
 	NSString *path = [self apiPath:[NSString stringWithFormat:@"/users/find_or_create.json"]];
 	NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:
-							aGUID, @"guid",
+							aGUID, @"user[guid]",
 							aName == nil ? @"" : aName, @"user[name]",
 							anEmail == nil ? @"" : anEmail, @"user[email]", 
 							[UVSession currentSession].currentToken.oauthToken.key, @"request_token",
@@ -279,7 +279,7 @@
 }
 
 - (NSString *)nameOrAnonymous {
-	return self.displayName ? self.displayName : @"Anonymous";
+	return self.displayName ? self.displayName : NSLocalizedStringFromTable(@"Anonymous", @"UserVoice", nil);
 }
 
 - (void)dealloc {

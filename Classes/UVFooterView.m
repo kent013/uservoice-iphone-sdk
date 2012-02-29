@@ -18,7 +18,6 @@
 #import "UVSuggestion.h"
 #import "UVSubdomain.h"
 #import "UVStyleSheet.h"
-#import "UVTaskBar.h"
 #import <QuartzCore/QuartzCore.h>
 
 #define UV_FOOTER_TAG_NAME_VIEW 1
@@ -36,46 +35,17 @@
 	[next release];
 }
 
-+ (CGFloat)heightForFooter {
-	return 110; // actual cells and padding + table footer
-}
-
-+ (UIView *)getHeaderView 
-{
++ (UVFooterView *)footerViewForController:(UVBaseViewController *)controller {
 	CGFloat screenWidth = [UVClientConfig getScreenWidth];
-	UIView *bottomShadow = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 10)] autorelease];
-	UIImage *shadow = [UIImage imageNamed:@"dropshadow_bottom_30.png"];
-	CGFloat widthScale = screenWidth / shadow.size.width; // horizontal scaling factor to expand shadow image
-	UIImageView *shadowView = [[[UIImageView alloc] initWithImage:shadow] autorelease];
-	shadowView.transform = CGAffineTransformMakeScale(widthScale, 1.0); // rescale the shadow
-	shadowView.center = CGPointMake(screenWidth/2, shadowView.center.y); // recenter the upscaled shadow
-	[bottomShadow addSubview:shadowView];	
-	return bottomShadow;
-}
-
-+ (UVFooterView *)footerViewForController:(UVBaseViewController *)controller 
-{
-    return [self footerViewForController:controller sectionHeaderHeight:10.0];
-}
-
-+ (UVFooterView *)altFooterViewForController:(UVBaseViewController *)controller
-{
-    return [self footerViewForController:controller sectionHeaderHeight:14.0];
-}
-
-+ (UVFooterView *)footerViewForController:(UVBaseViewController *)controller sectionHeaderHeight:(CGFloat)sectionHeaderHeight
-{
-	CGFloat screenWidth = [UVClientConfig getScreenWidth];
-	UVFooterView *footer = [[[UVFooterView alloc ]initWithFrame:CGRectMake(0, 0, screenWidth, [UVFooterView heightForFooter])] autorelease];
+	UVFooterView *footer = [[[UVFooterView alloc ]initWithFrame:CGRectMake(0, 0, screenWidth, 110)] autorelease];
 	footer.controller = controller;
 	
 	UITableView *theTableView = [[UITableView alloc] initWithFrame:footer.bounds style:UITableViewStyleGrouped];
 	theTableView.scrollEnabled = NO;
 	theTableView.delegate = footer;
 	theTableView.dataSource = footer;
-	theTableView.sectionHeaderHeight = sectionHeaderHeight;
+	theTableView.sectionHeaderHeight = 10.0;
 	theTableView.sectionFooterHeight = 8.0;		
-	theTableView.tableHeaderView = [self getHeaderView];
 	theTableView.backgroundColor = [UVStyleSheet backgroundColor];
     
     // Fix background color on iPad
@@ -84,7 +54,7 @@
 	
 	UIView *tableFooter = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 25)] autorelease];
 	UILabel *poweredBy = [[[UILabel alloc] initWithFrame:CGRectMake(30, 8, (screenWidth-80), 16)] autorelease];
-	poweredBy.text = @"Feedback powered by UserVoice";
+	poweredBy.text = NSLocalizedStringFromTable(@"Feedback powered by UserVoice", @"UserVoice", nil);
 	poweredBy.font = [UIFont systemFontOfSize:14.0];
 	poweredBy.textColor = [UVStyleSheet tableViewHeaderColor];
 	poweredBy.backgroundColor = [UIColor clearColor];
@@ -122,7 +92,7 @@
     CGFloat margin = (screenWidth > 480) ? 45 : 10;
 
 	if ([UVSession currentSession].loggedIn) {
-		cell.textLabel.text = @"My profile";
+		cell.textLabel.text = NSLocalizedStringFromTable(@"My profile", @"UserVoice", nil);
 		UIView *nameView = [[[UIView alloc] initWithFrame:CGRectMake(100, 13, (screenWidth - 130 - 2 * margin), 18)] autorelease];
 		UILabel *nameLabel = [[[UILabel alloc] initWithFrame:nameView.bounds] autorelease];
 		nameLabel.textColor = [UVStyleSheet signedInUserTextColor];
@@ -133,18 +103,18 @@
 		[nameView addSubview:nameLabel];
 		
 		if ([[UVSession currentSession].user hasUnconfirmedEmail]) {
-			UIImageView *icon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"uv_alert.png"]];
-			icon.frame = CGRectMake(156, 0, 18, 18);
-			[nameView addSubview:icon];
-			[icon release];
-			
 			// Shrink label to make space for the image
 			CGRect labelFrame = nameLabel.frame;
 			nameLabel.frame = CGRectMake(labelFrame.origin.x, labelFrame.origin.y, labelFrame.size.width - 23, labelFrame.size.height);
+
+			UIImageView *icon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"uv_alert.png"]];
+			icon.frame = CGRectMake(labelFrame.origin.x + labelFrame.size.width - 18, 0, 18, 18);
+			[nameView addSubview:icon];
+			[icon release];
 		}
 		[cell.contentView addSubview:nameView];
 	} else {
-		cell.textLabel.text = @"Sign in";
+		cell.textLabel.text = NSLocalizedStringFromTable(@"Sign in", @"UserVoice", nil);
 		cell.textLabel.textAlignment = UITextAlignmentLeft;
 //		cell.accessoryType = UITableViewCellAccessoryNone;
 //		cell.selectionStyle = UITableViewCellSelectionStyleNone;

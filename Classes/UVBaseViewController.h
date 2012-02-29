@@ -14,16 +14,16 @@
 // the search box, help bar, etc.
 @interface UVBaseViewController : UIViewController {
 	UVActivityIndicator *activityIndicator;
-	UIAlertView *errorAlertView;
 	BOOL needsReload;
 	UITableView *tableView;
     NSInteger kbHeight;
+    UIBarButtonItem *exitButton;
 }
 
 @property (nonatomic, retain) UVActivityIndicator *activityIndicator;
-@property (nonatomic, retain) UIAlertView *errorAlertView;
 @property (assign) BOOL needsReload;
 @property (nonatomic, retain) UITableView *tableView;
+@property (nonatomic, retain) UIBarButtonItem *exitButton;
 
 - (void)dismissUserVoice;
 
@@ -78,8 +78,10 @@
 									   style:(UITableViewCellStyle)style
 								  selectable:(BOOL)selectable;
 
-- (void)showErrorAlertViewWithMessage:(NSString *)message;
-- (UIAlertView *)setupErrorAlertViewWithMessage:(NSString *)message;
-- (void)setupErrorAlertViewDelegate;
+- (void)alertError:(NSString *)message;
+- (void)alertSuccess:(NSString *)message;
+- (void)hideExitButton;
+- (void)showExitButton;
+- (void)promptUserToSignIn;
 
 @end

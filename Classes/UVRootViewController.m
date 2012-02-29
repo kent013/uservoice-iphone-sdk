@@ -17,15 +17,12 @@
 #import "UVNetworkUtils.h"
 #import "UVSuggestion.h"
 #import "NSError+UVExtras.h"
+#include <QuartzCore/QuartzCore.h>
 
 @implementation UVRootViewController
 
 @synthesize ssoToken;
 @synthesize email, displayName, guid;
-
-- (void)setupErrorAlertViewDelegate {
-	errorAlertView.delegate = self;
-}
 
 - (id)initWithSsoToken:(NSString *)aToken {
 	if ((self = [super init])) {
@@ -49,7 +46,11 @@
 			[[UVSession currentSession].currentToken remove];
 			[UVToken getRequestTokenWithDelegate:self];
 		} else {
-			[self showErrorAlertViewWithMessage:@"This application didn't configure UserVoice properly"];
+            [[[[UIAlertView alloc] initWithTitle:NSLocalizedStringFromTable(@"Error", @"UserVoice", nil)
+                                         message:NSLocalizedStringFromTable(@"This application didn't configure UserVoice properly", @"UserVoice", nil)
+                                        delegate:self
+                               cancelButtonTitle:nil
+                               otherButtonTitles:NSLocalizedStringFromTable(@"OK", @"UserVoice", nil), nil] autorelease] show];
 		}
 	} else {
 		[super didReceiveError:error];
@@ -139,9 +140,20 @@
 	splashLabel2.font = [UIFont systemFontOfSize:15];
 	splashLabel2.textColor = [UIColor darkGrayColor];
 	splashLabel2.textAlignment = UITextAlignmentCenter;
-	splashLabel2.text = @"Connecting to UserVoice";
+	splashLabel2.text = NSLocalizedStringFromTable(@"Connecting to UserVoice", @"UserVoice", nil);
 	[contentView addSubview:splashLabel2];
 	[splashLabel2 release];
+    
+    UIButton *cancelButton = [[UIButton alloc] initWithFrame:CGRectMake((screenWidth-80)/2, (screenHeight/2)+40, 80, 20)];
+    [cancelButton setTitle:NSLocalizedStringFromTable(@"Cancel", @"UserVoice", nil) forState:UIControlStateNormal];
+    cancelButton.titleLabel.font = [UIFont systemFontOfSize:12];
+    cancelButton.titleLabel.textColor = [UIColor darkGrayColor];
+    cancelButton.backgroundColor = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.0];
+    cancelButton.layer.cornerRadius = 6.0;
+    [cancelButton addTarget:self action:@selector(dismissUserVoice) forControlEvents:UIControlEventTouchUpInside];
+    [contentView addSubview:cancelButton];
+    [cancelButton release];
+
 		
 	UIActivityIndicatorView *activity = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
 	activity.center = CGPointMake(screenWidth/2, (screenHeight/ 2) - 60);
@@ -160,6 +172,9 @@
 		UIImageView *serverErrorImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"uv_error_connection.png"]];
 		self.navigationController.navigationBarHidden = NO;
 		serverErrorImage.frame = self.view.frame;
+        serverErrorImage.contentMode = UIViewContentModeCenter;
+        serverErrorImage.backgroundColor = [UIColor colorWithRed:0.78f green:0.80f blue:0.83f alpha:1.0f];
+        serverErrorImage.clipsToBounds = YES;
 		[self.view addSubview:serverErrorImage];
 		[serverErrorImage release];
 	} else if (![UVToken exists]) {

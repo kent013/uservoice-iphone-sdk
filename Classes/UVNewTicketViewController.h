@@ -12,33 +12,22 @@
 
 @class UVCustomField;
 
-@interface UVNewTicketViewController : UVBaseViewController 
-<UITableViewDataSource, UITableViewDelegate, 
-	UITextFieldDelegate, UVTextEditorDelegate> {
-		
-	NSString *text;
-	NSString *name;
-	NSString *email;
-    NSString *subject;
+@interface UVNewTicketViewController : UVBaseViewController <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, UVTextEditorDelegate> {
 	UVTextEditor *textEditor;
-	UITextField *nameField;
 	UITextField *emailField;
-    UITextField *subjectField;
-	UIBarButtonItem *prevBarButton;
     UIView *activeField;
+    NSString *initialText;
+    BOOL withoutNavigation;
 	//NSArray *customFields;
 }
 
-@property (nonatomic, retain) NSString *text;
-@property (nonatomic, retain) NSString *name;
-@property (nonatomic, retain) NSString *email;
-@property (nonatomic, retain) NSString *subject;
 @property (nonatomic, retain) UVTextEditor *textEditor;
-@property (nonatomic, retain) UITextField *nameField;
 @property (nonatomic, retain) UITextField *emailField;
-@property (nonatomic, retain) UITextField *subjectField;
-@property (nonatomic, retain) UIBarButtonItem *prevBarButton;
 @property (nonatomic, retain) UIView *activeField;
+@property (nonatomic, retain) NSString *initialText;
 //@property (nonatomic, retain) NSArray *customFields;
+
+- (id)initWithText:(NSString *)text;
+- (id)initWithoutNavigation;
 
 @end
