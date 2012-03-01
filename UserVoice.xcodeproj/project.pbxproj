@@ -184,6 +184,7 @@
 
 /* Begin PBXFileReference section */
 		6474C33714BB8D5D00F6A2F0 /* UserVoice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UserVoice.h; path = Include/UserVoice.h; sourceTree = SOURCE_ROOT; };
+		7913BF6D14FF8B6E003EE902 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = UserVoice.strings; sourceTree = "<group>"; };
 		80B5291C13A16A2F008709D2 /* UVCustomField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UVCustomField.h; sourceTree = "<group>"; };
 		80B5291D13A16A2F008709D2 /* UVCustomField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UVCustomField.m; sourceTree = "<group>"; };
 		9F22C9C51189132A0091745E /* UVTopic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UVTopic.h; sourceTree = "<group>"; };
@@ -472,6 +473,14 @@
 			name = "Other Sources";
 			sourceTree = "<group>";
 		};
+		7913BF6B14FF8B6E003EE902 /* ja.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				7913BF6C14FF8B6E003EE902 /* UserVoice.strings */,
+			);
+			path = ja.lproj;
+			sourceTree = "<group>";
+		};
 		AC312140108D363D00000D5F /* Include */ = {
 			isa = PBXGroup;
 			children = (
@@ -635,6 +644,7 @@
 			children = (
 				D9CA8FEF14F4110800F98763 /* en.lproj */,
 				D9CA8FF214F4110800F98763 /* fr.lproj */,
+				7913BF6B14FF8B6E003EE902 /* ja.lproj */,
 				D2605CFA144662150029F16B /* uv_alert@2x.png */,
 				D2605D03144662150029F16B /* uv_default_avatar@2x.png */,
 				D2605D04144662150029F16B /* uv_error_connection@2x.png */,
@@ -912,6 +922,7 @@
 				German,
 				en,
 				fr,
+				ja,
 			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* UserVoice */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
@@ -1015,6 +1026,14 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		7913BF6C14FF8B6E003EE902 /* UserVoice.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7913BF6D14FF8B6E003EE902 /* ja */,
+			);
+			name = UserVoice.strings;
+			sourceTree = "<group>";
+		};
 		D9CA8FF014F4110800F98763 /* UserVoice.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
