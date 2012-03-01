@@ -2,11 +2,11 @@
     [%d Comment]
         en = %d Comment
         fr = %d Commentaire
-        ja = コメント数 %d
+        ja = %dコメント
     [%d Comments]
         en = %d Comments
         fr = %d Commentaires
-        ja = コメント数 %d 
+        ja = %dコメント
     [%d days ago]
         en = %d days ago
         fr = il y a %d jours
@@ -18,23 +18,23 @@
     [0 votes]
         en = 0 votes
         fr = 0 votes
-        ja = 投票数 0
+        ja = 0票
     [1 Comment]
         en = 1 Comment
         fr = 1 Commentaire
-        ja = コメント数 1 
+        ja = 1コメント 
     [1 vote]
         en = 1 vote
         fr = 1 vote
-        ja = 投票数 1
+        ja = 1票
     [2 votes]
         en = 2 votes
         fr = 2 votes
-        ja = 投票数 2
+        ja = 2票
     [3 votes]
         en = 3 votes
         fr = 3 votes
-        ja = 投票数 3
+        ja = 3票
     [A suggestion with this title already exists. Please change the title.]
         en = A suggestion with this title already exists. Please change the title.
         ja = 同じタイトルがすでに存在します。タイトルを変更してください。
@@ -52,11 +52,11 @@
     [Anonymous]
         en = Anonymous
         fr = Anonyme
-        ja = 匿名
+        ja = 空欄にすると匿名扱いになります。
     [Are you sure you want to flag this idea as inappropriate?]
         en = Are you sure you want to flag this idea as inappropriate?
         fr = Etes-vous sûr de vouloir signaler ce commentaire comme abusif?
-        ja = 本当にこのアイディアを不適切とマークしますか？
+        ja = 本当に報告しますか？
     [Back]
         en = Back
         fr = Retour
@@ -71,7 +71,7 @@
     [Changing your email address will require it to be confirmed again.]
         en = Changing your email address will require it to be confirmed again.
         fr = Changer votre adresse mail implique une nouvelle confirmation.
-        ja = メールアドレスを変更すると確認が必要になります。
+        ja = メールアドレスを変更すると\n確認が必要になります。
     [Checking...]
         en = Checking...
         fr = en cours de vérification...
@@ -79,7 +79,7 @@
     [Close]
         en = Close
         fr = Fermer
-        ja = 終了
+        ja = 完了
     [Comments]
         en = Comments
         ja = コメント
@@ -89,26 +89,26 @@
         ja = UserVoiceに接続中
     [Contact %@]
         en = Contact %@
-        ja = Contact %@
+        ja = %@に問い合わせ
     [Contact support]
         en = Contact support
         fr = Contactez l'assistance technique
-        ja = お問い合わせ
+        ja = 問い合わせ
     [Contact Us]
         en = Contact Us
         fr = Contactez-nous
-        ja = お問い合わせ
+        ja = 問い合わせ
     [Create Account]
         en = Create Account
         fr = Créer un compte
         ja = アカウントを作成
     [Create idea]
         en = Create idea
-        ja = アイデアを作成
+        ja = アイデアを登録
     [Created %d %@]
         en = Created %1$d %2$@
         fr = Créé %d %@
-        ja = %1$d %2$@を作成
+        ja = %1$d個の%2$@を登録
     [Created by]
         en = Created by
         fr = Créé par
@@ -139,7 +139,7 @@
     [Feedback & Support]
         en = Feedback & Support
         fr = Retours & Aide technique
-        ja = フィードバック & サポート
+        ja = アイデア提案 & お問い合わせ
     [Feedback powered by UserVoice]
         en = Feedback powered by UserVoice
         fr = Retour réalisé grâce à UserVoice
@@ -147,19 +147,19 @@
     [Flag]
         en = Flag
         fr = Signaler
-        ja = フラグ付け
+        ja = 報告
     [Flag as inappropriate]
         en = Flag as inappropriate
         fr = Signaler un abus
-        ja = 不適切報告
+        ja = 不適切な情報を報告
     [Flag Comment?]
         en = Flag Comment?
         fr = Signaler ce commentaire ?
-        ja = コメントにフラグ付けしますか？
+        ja = 報告の確認
     [Flag Idea?]
         en = Flag Idea?
         fr = Signaler cette idée ?
-        ja = アイデアにフラグ付けしますか？
+        ja = 報告の確認
     [Forgot your password?]
         en = Forgot your password?
         fr = Mot de passe oublié ?
@@ -167,7 +167,7 @@
     [Give feedback]
         en = Give feedback
         fr = Donner son retour
-        ja = フィードバックする
+        ja = アイデア提案
     [Idea]
         en = Idea
         fr = Idée
@@ -180,6 +180,10 @@
         en = ideas
         fr = idées
         ja = アイデア
+    [created ideas]
+        en = ideas
+        fr = idées
+        ja = 個のアイデアを作成
     [Ideas]
         en = Ideas
         fr = Idées
@@ -229,7 +233,7 @@
         ja = 名前
     [New Suggestion]
         en = New Suggestion
-        ja = 新規提案
+        ja = アイデアの登録
     [OK]
         en = OK
         fr = OK
@@ -259,7 +263,7 @@
     [Required]
         en = Required
         fr = Obligatoire
-        ja = 必須
+        ja = 必須です
     [Send]
         en = Send
         fr = Envoyer
@@ -297,7 +301,7 @@
     [Supporting %d %@]
         en = Supporting %d %@
         fr = Supporting %d %@
-        ja = Supporting %d %@
+        ja = %d個の%@に投票
     [There appears to be a problem with your network connection, please check your connectivity and try again.]
         en = There appears to be a problem with your network connection, please check your connectivity and try again.
         fr = Apparemment il y a un problème avec votre connection Internet, veuillez vérifier votre accès au réseau et essayez de nouveau.
@@ -335,22 +339,22 @@
     [votes]
         en = votes
         fr = votes
-        ja = 投票数
+        ja = 票
     [votes have]
         en = votes have
         fr = votes sont
-        ja = 獲得票数
+        ja = 投票権
     [Voting for this suggestion is now closed and your %d %@ been returned to you]
         en = Voting for this suggestion is now closed and your %1$d %2$@ been returned to you
         fr = Voter pour cette suggestion n'est plus possible et votre %d %@ vous a été retourné.
         ja = この提案への投票は締め切られています。%1$d %2$@票が戻されます。
     [Want to send a private message instead?]
         en = Want to send a private message instead?
-        ja = 代わりにプライベートメッセージを送りますか？
+        ja = プライベートメッセージを送る
     [Want to suggest an idea instead?]
         en = Want to suggest an idea instead?
         fr = Voulez-vous suggérer une autre idée à la place ?
-        ja = 代わりにアイデアを登録しますか？
+        ja = アイデアを登録する
     [We've sent an email telling you how to login and change your password.]
         en = We've sent an email telling you how to login and change your password.
         fr = Nous vous avons envoyé un email vous expliquant comment vous identifier et changer de mot de passe.
@@ -358,7 +362,7 @@
     [Welcome]
         en = Welcome
         fr = Bienvenue
-        ja = ようこそ
+        ja = フィードバック
     [Welcome back! We found your profile, but we need you to sign in to verify you are... you.]
         en = Welcome back! We found your profile, but we need you to sign in to verify you are... you.
         fr = Bienvenue ! Nous avons trouvé votre profil, cependant nous avons besoin que vous vous identifiez afin de vérifier qui vous êtes.
@@ -366,15 +370,15 @@
     [You have %d %@ remaining in this forum]
         en = You have %1$d %2$@ remaining in this forum
         fr = Vous avez %d %@ maintenu dans ce forum.
-        ja = このフォーラムではあと%1d %2$@票投票できます。
+        ja = このフォーラムではあと%1d %2$@投票できます。
     [You have successfully flagged this comment as inappropriate.]
         en = You have successfully flagged this comment as inappropriate.
         fr = Votre signalement d'un commentaire abusif a été réalisé avec succès.
-        ja = コメントが不適切報告されました。
+        ja = 不適切なコメントを報告しました。
     [You have successfully flagged this idea as inappropriate.]
         en = You have successfully flagged this idea as inappropriate.
         fr = Votre signalement d'une idée abusive a été réalisé avec succès.
-        ja = アイデアが不適切報告されました。
+        ja = 不適切なアイデアを報告しました。
     [You will need to sign in to vote.]
         en = You will need to sign in to vote.
         fr = Vous aurez besoin de vous identifier pour voter.
@@ -385,7 +389,7 @@
         ja = メールが確認されていません。
     [Your idea "%@" was successfully created.]
         en = Your idea "%@" was successfully created.
-        ja = アイディア 「%@」が登録されました。
+        ja = アイデア 「%@」が登録されました。
     [Your ticket was successfully submitted.]
         en = Your ticket was successfully submitted.
         fr = Votre commentaire a été soumis avec succès.
